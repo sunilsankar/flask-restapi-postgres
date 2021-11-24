@@ -13,6 +13,7 @@ vagrant up
 This roughly takes about 10 to 15 minutes depending upon your system configuratiion . I have given 4GB as my vm memory
 
 **Deploying of inventory flask api script**
+
 I have already build the image and the code is present my this repository under **app.py**
 
 You can find the image here
