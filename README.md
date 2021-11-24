@@ -335,5 +335,5 @@ vagrant@inventoryapiminikube:/vagrant$
 Configure datasource as loki in Gafana
 ![](screenshots/13.png)
 
-When you go under explorer you will see the logs
+When you go under explorer you will see the logs when you query the pods and with this we can create dashboard
 ![](screenshots/14.png)
