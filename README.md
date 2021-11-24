@@ -4,7 +4,7 @@ This is a simple inventory Application restapi service deployed in minikube usin
 InventoryApi service maintains the inventory list of hostname, ipaddress ,which environment whether it is developement or production or staging and also the application running on the server. The user needs to input the data and this gets stored in postgres database and can be used for easy retrival
 
 ## Deployment of InventoryApi
-I have deployed this in my vagrant environment with KVM as my driver. My vagrantfile is compatible with virtualbox and parallel platform. We can also deploy this in cloud environment
+I have deployed this in my vagrant environment with KVM as my driver. My vagrantfile is compatible with virtualbox and parallel platform. We can also deploy this in cloud environment skipping vagrant up
 
 **Bring up the minikube and locally installed postgres environment**
 ```
