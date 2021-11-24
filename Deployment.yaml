@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: inventoryapi
+  name: inventoryapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: inventoryapi
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: inventoryapi
+    spec:
+      containers:
+      - image: sunilsankar/inventoryapi
+        name: inventoryapi
+        env:
+         - name: DBHOST
+           value: 172.16.16.100
+         - name: DBUSER
+           value: postgres
+         - name: DBPASS
+           valueFrom:
+              secretKeyRef:
+                   name: dbpassword
+                   key: password
+         - name: DBNAME
+           value: inventory

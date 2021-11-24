@@ -1,0 +1,60 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: adding the postgres key
+      apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+    - name: adding repo
+      apt_repository:
+        repo: "deb http://apt.postgresql.org/pub/repos/apt/ focal-pgdg main"
+        state: present
+        filename: pgdg
+
+    - name: Installing Postgresql
+      apt:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+        - postgresql
+        - postgresql-contrib
+        - postgresql-client
+        - python3-dev 
+        - libpq-dev
+        - python3-psycopg2
+        - acl
+        - python3-pip
+        update_cache: yes
+    - name: adding the line
+      lineinfile:
+        path: /etc/postgresql/14/main/postgresql.conf
+        line: "listen_addresses = '*' "
+    - name: Enable external connection1
+      lineinfile:
+         path: /etc/postgresql/14/main/pg_hba.conf
+         line: 'host all all 0.0.0.0/0 md5'
+    - name: Enable external connection2
+      lineinfile:
+          path: /etc/postgresql/14/main/pg_hba.conf
+          line: 'host all all  ::/0  md5'
+
+    - name: restart postgresql
+      systemd:
+         name: postgresql
+         state: restarted
+         enabled: yes
+
+    - name: Create database
+      postgresql_db:
+          name: inventory
+      become_user: postgres
+      become: yes
+    - name: Set postgres user password
+      become: yes
+      become_user: postgres
+      postgresql_user: 
+          db: inventory
+          name: postgres
+          password: "postgres"
+  

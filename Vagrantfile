@@ -4,15 +4,15 @@ Vagrant.configure(2) do |config|
   config.ssh.insert_key = false
   config.vm.synced_folder "./", "/vagrant"
    config.vm.provision "ansible_local" do |ansible|
-   ansible.playbook = "minikube.yml"
+   ansible.playbook = "ansible/minikube.yml"
   end
 
   # Kubernetes Master Server
-  config.vm.define "minikube" do |node|
+  config.vm.define "inventoryapiminikube" do |node|
   
     node.vm.box               = "generic/ubuntu2004"
     node.vm.box_check_update  = false
-    node.vm.hostname          = "minikube.example.com"
+    node.vm.hostname          = "inventoryapiminikube"
 
     node.vm.network "private_network", ip: "172.16.16.100"
   
@@ -33,8 +33,8 @@ Vagrant.configure(2) do |config|
      end
 
      
-#    node.vm.provision "ansible_local" do |ansible|
-#      ansible.playbook = "ansible/master.yaml"
-#    end
+   node.vm.provision "ansible_local" do |ansible|
+     ansible.playbook = "ansible/postgres.yml"
+    end
  end 
   end

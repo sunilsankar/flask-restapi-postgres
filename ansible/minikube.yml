@@ -1,0 +1,181 @@
+- hosts: all
+  become: yes
+  gather_facts: True
+  
+  tasks:
+  - name: Remove swapfile from /etc/fstab
+    mount:
+        name: "{{ item }}"
+        fstype: swap
+        state: absent
+    with_items:
+        - swap
+        - none
+  - name: Disable swap
+    command: swapoff -a
+    when: ansible_swaptotal_mb > 0
+  
+  - name: Disable firewall
+    ufw:
+      state: disabled
+  - name: Adding the module file
+    copy:
+      dest: "/etc/modules-load.d/containerd.conf"
+      content: |
+        overlay  
+        br_netfilter
+      mode: 0644
+  
+  - name: Add the module
+    modprobe:
+      name: "{{ item}}"
+      state: present
+    with_items:
+      - overlay
+      - br_netfilter
+        
+ 
+        
+  # Set ip forwarding on in /proc and in the sysctl file and reload if necessary
+  - name: Adding the sysctl entries
+    sysctl:
+      name: "{{ item }}"
+      value: '1'
+      sysctl_set: yes
+      state: present
+      reload: yes
+    with_items:
+        - net.bridge.bridge-nf-call-ip6tables
+        - net.bridge.bridge-nf-call-iptables
+        - net.ipv4.ip_forward
+
+  - name: Installing dependent packages
+    apt:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+        - ca-certificates
+        - apt-transport-https
+        - curl
+        - gnupg-agent
+        - software-properties-common
+        - conntrack
+        - wget
+        - tar
+        - unzip
+        - gzip
+      update_cache: yes
+  #
+  - name: Add Docker GPG key
+    apt_key: url=https://download.docker.com/linux/ubuntu/gpg
+
+  - name: Add Docker APT repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+
+
+  - name: Install Docker-CE
+    apt:
+      # name: docker-ce=17.03.2~ce-0~ubuntu-xenial
+      # name: docker-ce=17.12.1~ce-0~ubuntu
+      name: docker-ce     
+      state: present
+      update_cache: yes
+
+  - name: usermod -aG docker vagrant
+    user:
+      name: vagrant
+      groups: docker
+
+ 
+  #
+  - name: Set sysctl 
+    sysctl:
+      name: net.bridge.bridge-nf-call-iptables
+      value: 1
+      sysctl_set: yes
+      sysctl_file: /etc/sysctl.conf      
+      state: present
+      reload: yes
+
+ 
+  #
+
+
+
+  
+  #
+  - name: download
+    get_url:
+      #url: https://storage.googleapis.com/kubernetes-release/release/v1.13.4/bin/linux/amd64/kubectl
+      url: https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl     
+      dest: /usr/local/bin/
+      mode: 0755
+      owner: root
+      group: root
+
+  - name: download
+    get_url:
+      url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+      dest: /usr/local/bin/minikube
+      mode: 0755
+      owner: root
+      group: root
+
+
+  ## Start Minikube
+  #
+  - name: start Minikube temporary
+    command: /usr/local/bin/minikube start --driver=none
+    args:
+      chdir: /root
+    register: mini      
+
+  ## Wait start containers
+  #
+  - name: waiting
+    command: sleep 30
+
+
+  ## move .minikube and .kube
+  #
+  #- name: cp /root/.kube  /home/vagrant/.kube
+  #  copy:
+  #    src: /root/.kube
+  #    dest: /home/vagrant/.kube
+  #    owner: vagrant
+  #    group: vagrant
+  #    mode: 0755
+      
+  #- name: cp /root/.minikube  /home/vagrant/.minikube
+  #  copy:
+  #    src: /root/.minikube
+  #    dest: /home/vagrant/.minikube
+  #    owner: vagrant
+  #    group: vagrant
+  #    mode: 0755
+
+  - shell: mv /root/.kube /home/vagrant/.kube
+  - shell: chown -R vagrant:vagrant /home/vagrant/.kube
+
+  - shell: mv /root/.minikube /home/vagrant/.minikube
+  - shell: chown -R vagrant:vagrant /home/vagrant/.minikube
+
+
+  - name: change path
+    command: sed -i -e 's|root|home\/vagrant|g' /home/vagrant/.kube/config
+
+  - name: Installing Helm
+    get_url: 
+        url: https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz
+        dest: /tmp/helm-v3.7.1-linux-amd64.tar.gz
+  - name: extracting helm
+    unarchive:
+         src: /tmp/helm-v3.7.1-linux-amd64.tar.gz
+         dest: /tmp/
+
+  - name: moving helm to /usr/bin
+    shell: 
+        cmd: "mv /tmp/linux-amd64/helm /usr/local/bin && chmod 755 /usr/local/bin/helm"
+    
