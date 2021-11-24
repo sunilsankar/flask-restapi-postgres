@@ -1,10 +1,10 @@
 # InventoryApi
-This is a simple inventory Application restapi service deployed in minikube using external postgres database( we can also deploy postgres in kubenetes but it needs a persistent store) having an external database has its advantage since we dont not need to worry much about the maintenance of database . We can also deploy this code in any cloud platform 8s along with rdms as service.
+This is a simple inventory Application restapi service deployed in minikube using external postgres database( we can also deploy postgres in kubernetes but it needs a persistent store  since it is a stateful application) .Having an external database has its advantage since we dont not need to worry much about the maintenance of database . We can also deploy this code in any cloud platform k8s along with rdms as service.
 ## Introduction
 InventoryApi service maintains the inventory list of hostname, ipaddress ,which environment whether it is developement or production or staging and also the application running on the server. The user needs to input the data and this gets stored in postgres database and can be used for easy retrieval
 
 ## Deployment of InventoryApi
-I have deployed this in my vagrant environment with KVM as my driver. My vagrantfile is compatible with virtualbox and parallel platform. We can also deploy this in cloud environment skipping vagrant up
+I have deployed inventory api in my vagrant environment with KVM . My vagrantfile is compatible with virtualbox and parallel platform. We can also deploy this in cloud environment skipping vagrant up
 
 **Bring up the minikube and locally installed postgres environment**
 ```
