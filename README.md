@@ -1,7 +1,7 @@
 # InventoryApi
 This is a simple inventory Application restapi service deployed in minikube using external postgres database( we can also deploy postgres in kubenetes but it needs a persistent store) having an external database has its advantage since we dont not need to worry much about the maintenance of database . We can also deploy this code in any cloud platform 8s along with rdms as service.
 ## Introduction
-InventoryApi service maintains the inventory list of hostname, ipaddress ,which environment whether it is developement or production or staging and also the application running on the server. The user needs to input the data and this gets stored in postgres database and can be used for easy retrival
+InventoryApi service maintains the inventory list of hostname, ipaddress ,which environment whether it is developement or production or staging and also the application running on the server. The user needs to input the data and this gets stored in postgres database and can be used for easy retrieval
 
 ## Deployment of InventoryApi
 I have deployed this in my vagrant environment with KVM as my driver. My vagrantfile is compatible with virtualbox and parallel platform. We can also deploy this in cloud environment skipping vagrant up
@@ -14,12 +14,12 @@ This roughly takes about 10 to 15 minutes depending upon your system configurati
 
 **Deploying of inventory flask api script**
 
-I have already build the image and the code is present my this repository under **app.py**
+I have already build the image and the code is present in this repository under **app.py** and also the docker file for reference.
 
-You can find the image here
+You can find the image build here
 [InventoryApi](https://hub.docker.com/r/sunilsankar/inventoryapi)
 
-Ansible has provisioned postgres created a database named inventory and also reset postgres password to **postgres** we can change this if necessary and also allowed public access .We can validate by connecting with the below ipaddress taken from vagrant file
+Ansible job has provisioned postgres created a database named inventory and also reset postgres password to **postgres** we can change this if necessary and also allowed public access .We can validate by connecting with the below ipaddress taken from vagrant file
 ```
 vagrant ssh
 ```
@@ -28,7 +28,7 @@ psql -U postgres -h 172.16.16.100 -d inventory
 ```
 Now we can deploy the restapi service
 ### Step1
-First we need to deploy metallb since minikube we need to do a tunnel to validate LoadBalancer setup .This solves the issue when we deploy kubernetes in inhouse setup. For details [Metallb](https://metallb.universe.tf/).
+First we need to deploy metallb since minikube we need to do a tunnel to validate LoadBalancer setup .Metallb solves the issue with LoadBalancer  when we deploy kubernetes inhouse . For details on [Metallb](https://metallb.universe.tf/).
 
 Deploy metallb service
 ```
@@ -47,7 +47,7 @@ vagrant@inventoryapiminikube:~$
 Metallb Layer2 Configuration:
 For more details on Layer2 Configuration. Please refer to [Metallblayer2](https://metallb.universe.tf/configuration/#layer-2-configuration)
 
-Create a Yaml file taking the minikube ipaddress and deciding the range
+Create a Yaml file taking the minikube ipaddress and deciding the range to be used make sure it is in the same vlan range
 **config.yaml**
 ```
 apiVersion: v1
@@ -69,7 +69,8 @@ kubectl create -f config.yml
 ```
 ### Step2
 Deployment of inventory api
-1. Deployment of secret.yaml which contains the postgres password in  encrypted test . Here the postgres password is postgres
+The password of database is stored in kubernetes secret
+1. Deployment of secret.yaml which contains the postgres password in  encrypted text . Here the postgres password is **postgres**
 ```
 kubectl create -f Secret.yaml
 
@@ -113,7 +114,7 @@ Getting the inventory list
 ### Step 3 Adding Monitoring 
 Helm is already installed when we provisioned minikube.
 1. deploying prometheus
-Adding the proemetheus repo
+Adding the prometheus helm repo
 ```
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 ```
@@ -239,6 +240,7 @@ prometheus-server               LoadBalancer   10.102.53.117   192.168.121.221  
 vagrant@inventoryapiminikube:/vagrant$ 
 
 ```
+Accessing prometheus from browser
 ![](screenshots/4.png)
 2. Deploying Grafana
 Adding helm repo
